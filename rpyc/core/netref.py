@@ -65,7 +65,7 @@ def syncreq(proxy, handler, *args):
     :raises: any exception raised by the operation will be raised
     :returns: the result of the operation
     """
-    conn = object.__getattribute__(proxy, "____conn__")()
+    conn = object.__getattribute__(proxy, "____conn__")
     if not conn:
         raise ReferenceError('weakly-referenced object no longer exists')
     oid = object.__getattribute__(proxy, "____oid__")
@@ -83,7 +83,7 @@ def asyncreq(proxy, handler, *args):
     :returns: an :class:`AsyncResult <rpyc.core.async.AsyncResult>` representing
               the operation
     """
-    conn = object.__getattribute__(proxy, "____conn__")()
+    conn = object.__getattribute__(proxy, "____conn__")
     if not conn:
         raise ReferenceError('weakly-referenced object no longer exists')
     oid = object.__getattribute__(proxy, "____oid__")
