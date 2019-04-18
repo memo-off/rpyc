@@ -48,7 +48,7 @@ class Server(object):
 
     def __init__(self, service, hostname = "", ipv6 = False, port = 0,
             backlog = 10, reuse_addr = True, authenticator = None, registrar = None,
-            auto_register = None, protocol_config = {}, logger = None, listener_timeout = 0.5,
+            auto_register = None, protocol_config = {}, logger = None, listener_timeout = 5,
             socket_path = None):
         self.active = False
         self._closed = False
@@ -137,7 +137,9 @@ class Server(object):
                 sock, addrinfo = self.listener.accept()
             except socket.timeout:
                 pass
-            except socket.error:
+            except socket.error as e:
+                self.logger.info('rpyc-Server-socket-error: %s, %s, timeout: %s' % (type(self.listener), type(e), self.listener.gettimeout()))
+                self.logger.info('rpyc-Server-socket-error: %s(%s)' % (e, e.errno))
                 ex = sys.exc_info()[1]
                 if get_exc_errno(ex) in (errno.EINTR, errno.EAGAIN):
                     pass

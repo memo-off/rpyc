@@ -228,14 +228,25 @@ class SocketStream(Stream):
             count -= len(buf)
         return BYTES_LITERAL("").join(data)
     def write(self, data):
-        try:
-            while data:
+        while data:
+            try:
                 count = self.sock.send(data[:self.MAX_IO_CHUNK])
                 data = data[count:]
-        except socket.error:
-            ex = sys.exc_info()[1]
-            self.close()
-            raise EOFError(ex)
+            # ...
+            except socket.timeout:
+                print('rpyc-Stream-socket-timeout')
+                continue
+            # ...
+            except socket.error as e:
+                print('rpyc-Stream-socket-error: %s, %s, timeout: %s' % (type(self.sock), type(e), self.sock.gettimeout()))
+                print('rpyc-Stream-socket-error: %s(%s)' % (e, e.errno))
+                if e.errno == 10035 or 'timed out' in str(e):
+                    print('rpyc-Stream ...send timed out...')
+                    continue
+                else:
+                    ex = sys.exc_info()[1]
+                    self.close()
+                    raise EOFError(ex)
 
 class TunneledSocketStream(SocketStream):
     """A socket stream over an SSH tunnel (terminates the tunnel when the connection closes)"""

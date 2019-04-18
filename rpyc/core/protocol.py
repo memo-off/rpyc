@@ -246,25 +246,29 @@ class Connection(object):
         # holds the sendlock send it when it's done with its current job.
         # NOTE: Atomic list operations should be thread safe,
         # please call me out if they are not on all implementations!
-        self._send_queue.append(data)
-        # It is crucial to check the queue each time AFTER releasing the lock:
-        while self._send_queue:
-            if not self._sendlock.acquire(False):
-                # Another thread holds the lock. It will send the data after
-                # it's done with its current job. We can safely return.
-                return
-            try:
-                # Can happen if another consumer was scheduled in between
-                # `while` and `acquire`:
-                if not self._send_queue:
-                    # Must `continue` to ensure that `send_queue` is checked
-                    # after releasing the lock! (in case another producer is
-                    # scheduled before `release`)
-                    continue
-                data = self._send_queue.pop(0)
-                self._channel.send(data)
-            finally:
-                self._sendlock.release()
+        # self._send_queue.append(data)
+
+        # # It is crucial to check the queue each time AFTER releasing the lock:
+        # while self._send_queue:
+        #     if not self._sendlock.acquire(False):
+        #         # Another thread holds the lock. It will send the data after
+        #         # it's done with its current job. We can safely return.
+        #         return
+        #     try:
+        #         # Can happen if another consumer was scheduled in between
+        #         # `while` and `acquire`:
+        #         if not self._send_queue:
+        #             # Must `continue` to ensure that `send_queue` is checked
+        #             # after releasing the lock! (in case another producer is
+        #             # scheduled before `release`)
+        #             continue
+        #         data = self._send_queue.pop(0)
+        #         self._channel.send(data)
+        #     finally:
+        #         self._sendlock.release()
+
+        # channel's send() should be thread-safe
+        self._channel.send(data)
 
     def _send_request(self, seq, handler, args):
         self._send(consts.MSG_REQUEST, seq, (handler, self._box(args)))

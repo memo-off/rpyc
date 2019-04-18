@@ -6,6 +6,7 @@ Constants used by the protocol
 MSG_REQUEST      = 1
 MSG_REPLY        = 2
 MSG_EXCEPTION    = 3
+MSG_REQUEST_HIGH_PRIO = 4
 
 # boxing
 LABEL_VALUE      = 1
